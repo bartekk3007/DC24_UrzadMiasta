@@ -1,0 +1,60 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "title": "Wniosek o dowód osobisty",
+  "type": "object",
+  "properties": {
+    "daneOsobowe": {
+      "type": "object",
+      "properties": {
+        "imie": { "type": "string" },
+        "nazwisko": { "type": "string" },
+        "dataUrodzenia": { "type": "string", "format": "date" },
+        "plec": { "type": "string", "enum": ["mężczyzna", "kobieta"] },
+        "nazwiskoRodowe": { "type": "string" },
+        "miejsceUrodzenia": { "type": "string" },
+        "obywatelstwo": { 
+          "type": "string",
+          "enum": ["polskie", "inne"]
+        }
+      },
+      "required": ["imie", "nazwisko", "dataUrodzenia", "plec", "obywatelstwo"]
+    },
+    "daneKontaktowe": {
+      "type": "object",
+      "properties": {
+        "ulica": { "type": "string" },
+        "numerDomuLokalu": { "type": "string" },
+        "kodPocztowy": { "type": "string", "pattern": "\\d{2}-\\d{3}" },
+        "miejscowosc": { "type": "string" },
+        "nrTelefonu": { "type": "string", "pattern": "\\+?\\d{9,15}" },
+        "email": { "type": "string", "format": "email" }
+      },
+      "required": ["ulica", "numerDomuLokalu", "kodPocztowy", "miejscowosc"]
+    },
+    "powodZlozeniaWniosku": {
+      "type": "string",
+      "enum": [
+        "pierwszy dowód",
+        "zmiana danych osobowych",
+        "upływ terminu ważności dowodu",
+        "zagubienie/utrata dowodu",
+        "uszkodzenie dowodu",
+        "kradzież tożsamości",
+        "inny"
+      ]
+    },
+    "fotografia": {
+      "type": "string",
+      "contentEncoding": "base64"
+    },
+    "podpisy": {
+      "type": "object",
+      "properties": {
+        "podpisUrzędnika": { "type": "string" },
+        "podpisWnioskodawcy": { "type": "string" }
+      },
+      "required": ["podpisWnioskodawcy"]
+    }
+  },
+  "required": ["daneOsobowe", "daneKontaktowe", "powodZlozeniaWniosku", "podpisy"]
+}
