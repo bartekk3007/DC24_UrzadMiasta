@@ -49,17 +49,11 @@
     },
     "Powód złożenia wniosku": {
       "type": "string",
-      "description": "Pierwszy dowód / Zmiana danych osobowych / Upływ terminu ważności dowodu / Zagubienie/utrata dowodu / Uszkodzenie dowodu / Kradzież tożsamości / inne"
+      "description": "Pierwszy dowód / Zmiana danych osobowych / Upływ terminu ważności dowodu / Zagubienie/utrata dowodu / Uszkodzenie dowodu / Kradzież tożsamości / inny"
     },
     "Fotografia": {
       "type": "string",
       "description": "Fotografia dostarczona przez email / Fotografia załączona razem z wnioskiem"
-    },
-    "Czytelny podpis urzędnika": {
-      "type": "string"
-    },
-    "Czytelny podpis wnioskodawcy": {
-      "type": "string"
     }
   },
   "required": [
@@ -76,8 +70,6 @@
     "Kod pocztowy",
     "Miejscowość",
     "Powód złożenia wniosku",
-    "Fotografia",
-    "Czytelny podpis urzędnika",
-    "Czytelny podpis wnioskodawcy"
+    "Fotografia"
   ]
 }
