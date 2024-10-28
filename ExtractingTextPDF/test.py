@@ -42,34 +42,29 @@ for line in lines:
          if "opcjonalny" not in key:
             schema["required"].append(key)
 
-schema["properties"]["Powód złożenia wniosku"] = {
-   "type": "string",
-   "description" : "Pierwszy dowód / Zmiana danych osobowych / Upływ terminu ważności dowodu / "
-                   "Zagubienie/utrata dowodu / Uszkodzenie dowodu / Kradzież tożsamości / inne"
-}
-schema["required"].append("Powód złożenia wniosku")
-
-schema["properties"]["Fotografia"] = {
-   "type": "string",
-   "description" : "Fotografia dostarczona przez email / Fotografia załączona razem z wnioskiem"
-}
-schema["required"].append("Fotografia")
-
-schema["properties"]["Czytelny podpis urzędnika"] = {
-   "type": "string"
-}
-schema["required"].append("Czytelny podpis urzędnika")
-
-schema["properties"]["Czytelny podpis wnioskodawcy"] = {
-   "type": "string"
-}
-schema["required"].append("Czytelny podpis wnioskodawcy")
+lines = text.split('\n')
+optionsList = []
+lastDot = 0
+for index, line in enumerate(lines):
+   if line == "●" and len(optionsList) == 0 and index != 0:
+      optionsList.append(lines[index - 1][3:])
+      lastDot = index
+   if line == "●":
+      optionsList.append(lines[index + 1].replace('…','').replace('.','').replace(':','').replace('-','').strip())
+      lastDot = index
+   if index == lastDot + 2 and len(optionsList) > 0:
+      print(optionsList)
+      schema["properties"][optionsList[0]] = {
+         "type": "string",
+         "description": " / ".join(optionsList[1:])
+      }
+      schema["required"].append(optionsList[0])
+      optionsList.clear()
 
 print(schema)
 print(json.dumps(schema, indent=2, ensure_ascii=False))  # Wyświetlenie struktury JSON
 with open('schemaFile.json', 'w', encoding='utf-8') as json_file:
    json.dump(schema, json_file, indent=2, ensure_ascii=False)
-
 
 '''
 # Przykład: podziel tekst na linie i utwórz strukturę JSON
