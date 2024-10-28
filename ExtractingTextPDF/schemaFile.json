@@ -1,0 +1,83 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "Wniosek o dowód osobisty",
+  "type": "object",
+  "properties": {
+    "Miejscowość i data": {
+      "type": "string"
+    },
+    "Imię/Imiona": {
+      "type": "string"
+    },
+    "Nazwisko": {
+      "type": "string"
+    },
+    "Data urodzenia": {
+      "type": "string"
+    },
+    "Płeć": {
+      "type": "string",
+      "description": "kobieta / mężczyzna"
+    },
+    "Nazwisko rodowe": {
+      "type": "string"
+    },
+    "Miejsce urodzenia": {
+      "type": "string"
+    },
+    "Obywatelstwo": {
+      "type": "string",
+      "description": "polskie / inne"
+    },
+    "Ulica": {
+      "type": "string"
+    },
+    "Numer domu/lokalu": {
+      "type": "string"
+    },
+    "Kod pocztowy": {
+      "type": "string"
+    },
+    "Miejscowość": {
+      "type": "string"
+    },
+    "Nr. telefonu (opcjonalny)": {
+      "type": "string"
+    },
+    "Adres e-mail (opcjonalny)": {
+      "type": "string"
+    },
+    "Powód złożenia wniosku": {
+      "type": "string",
+      "description": "Pierwszy dowód / Zmiana danych osobowych / Upływ terminu ważności dowodu / Zagubienie/utrata dowodu / Uszkodzenie dowodu / Kradzież tożsamości / inne"
+    },
+    "Fotografia": {
+      "type": "string",
+      "description": "Fotografia dostarczona przez email / Fotografia załączona razem z wnioskiem"
+    },
+    "Czytelny podpis urzędnika": {
+      "type": "string"
+    },
+    "Czytelny podpis wnioskodawcy": {
+      "type": "string"
+    }
+  },
+  "required": [
+    "Miejscowość i data",
+    "Imię/Imiona",
+    "Nazwisko",
+    "Data urodzenia",
+    "Płeć",
+    "Nazwisko rodowe",
+    "Miejsce urodzenia",
+    "Obywatelstwo",
+    "Ulica",
+    "Numer domu/lokalu",
+    "Kod pocztowy",
+    "Miejscowość",
+    "Powód złożenia wniosku",
+    "Fotografia",
+    "Czytelny podpis urzędnika",
+    "Czytelny podpis wnioskodawcy"
+  ]
+}
