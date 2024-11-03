@@ -56,7 +56,7 @@ class PDFGenerator:
 
         schema = None
 
-        with open("./DocumentPDFGenerator/WniosekJsonSchema.json", encoding="utf-8") as f:
+        with open("./Src/DocumentPDFGenerator/WniosekJsonSchema.json", encoding="utf-8") as f:
             schema = JSON.load(f)
 
         try:
@@ -107,7 +107,7 @@ class PDFGenerator:
         writer.close()
 
         os.remove("temp.jpg")
-
+        
         return pdf
 
     def __addContent(self, body: pymupdf.Xml, key, val):
