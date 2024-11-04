@@ -12,7 +12,7 @@ export class GdriveComponent {
   constructor(private http: HttpClient) {}
 
   @ViewChild('fileInput') fileInput!: ElementRef;
-  file: File;
+  file!: File;
   formData: FormData = new FormData();
 
   handleChange(fileInput:any): void{

@@ -1,106 +1,16 @@
 <div id="formWrapper">
-    <form [formGroup]="identityForm" (ngSubmit)="onSubmit()">
-        <h3>Dane osobowe {{getTitleForGender()}}</h3>
-        <div>
-            <label for="firstName">Imię/Imiona:</label>
-            <input id="firstName" formControlName="firstName" type="text" />
-        </div>
-    
-        <div>
-            <label for="lastName">Nazwisko:</label>
-            <input id="lastName" formControlName="lastName" type="text" />
-        </div>
-    
-        <div>
-            <label for="birthDate">Data urodzenia:</label>
-            <input id="birthDate" formControlName="birthDate" type="date" />
-        </div>
-    
-        <div>
-            <label>Płeć:</label>
-            <label><input formControlName="gender" type="radio" [value]="GENDERS.MALE" /> Mężczyzna</label>
-            <label><input formControlName="gender" type="radio" [value]="GENDERS.FEMALE" /> Kobieta</label>
-        </div>
-    
-        <div>
-            <label for="familyName">Nazwisko rodowe:</label>
-            <input id="familyName" formControlName="familyName" type="text" />
-        </div>
-    
-        <div>
-            <label for="birthPlace">Miejsce urodzenia:</label>
-            <input id="birthPlace" formControlName="birthPlace" type="text" />
-        </div>
-    
-        <div>
-            <label for="citizenship">Obywatelstwo:</label>
-            <input id="citizenship" formControlName="citizenship" type="text" />
-        </div>
-    
-        <h3>Dane kontaktowe {{getTitleForGender()}}</h3>
-        <div>
-            <label for="street">Ulica:</label>
-            <input id="street" formControlName="street" type="text" />
-        </div>
-    
-        <div>
-            <label for="houseNumber">Numer domu/lokalu:</label>
-            <input id="houseNumber" formControlName="houseNumber" type="text" />
-        </div>
-    
-        <div>
-            <label for="postalCode">Kod pocztowy:</label>
-            <input id="postalCode" formControlName="postalCode" type="text" />
-        </div>
-    
-        <div>
-            <label for="city">Miejscowość:</label>
-            <input id="city" formControlName="city" type="text" />
-        </div>
-    
-        <div>
-            <label for="phoneNumber">Nr. telefonu (opcjonalny):</label>
-            <input id="phoneNumber" formControlName="phoneNumber" type="tel" />
-        </div>
-    
-        <div>
-            <label for="email">Adres e-mail (opcjonalny):</label>
-            <input id="email" formControlName="email" type="email" />
-        </div>
-    
-        <h3>Powód złożenia wniosku</h3>
-        <div id="reasonSelect">
-            <label><input formControlName="reason" type="radio" value="firstID" /> Pierwszy dowód</label>
-            <label><input formControlName="reason" type="radio" value="changeOfData" /> Zmiana danych osobowych</label>
-            <label><input formControlName="reason" type="radio" value="expiration" /> Upływ terminu ważności dowodu</label>
-            <label><input formControlName="reason" type="radio" value="lost" /> Zagubienie/utrata dowodu</label>
-            <label><input formControlName="reason" type="radio" value="damage" /> Uszkodzenie dowodu</label>
-            <label><input formControlName="reason" type="radio" value="theft" /> Kradzież tożsamości</label>
-            <label>
-                <input formControlName="reason" type="radio" value="other" /> Inny: 
-                @if(displayDifferentReasonInput) {
-                    <input type="text" formControlName="otherReason" />
-                }
-            </label>
-        </div>
-    
-        <h3>Fotografia</h3>
-        <div>
-            <label><input formControlName="photoMethod" type="radio" value="email" /> Fotografia dostarczona przez
-                email</label>
-            <label><input formControlName="photoMethod" type="radio" value="attached" /> Fotografia załączona razem z
-                wnioskiem</label>
-        </div>
-    
-        <h3>Podpis</h3>
-        <p>Wnioskodawca/wnioskodawczyni oświadcza że podane dane są zgodne z prawdą i jest świadomy/świadoma
-            odpowiedzialności karnej za składanie wniosku z fałszywymi danymi.</p>
-    
-        <div>
-            <label for="applicantSignature">Podpis {{ getTitleForGender() }}:</label>
-            <input id="applicantSignature" formControlName="applicantSignature" type="text" />
-        </div>
-    
-        <button type="submit">Złóż wniosek</button>
-    </form>
+    @if (schema && identityForm && formConfig) {
+        
+        <form [formGroup]="identityForm" (ngSubmit)="onSubmit()" id="form">
+            <h2 id="form-title">
+                {{ schema.title }}
+            </h2>
+            @for (section of formConfig.sections; track $index) {
+                <h3>
+                    {{ section.title }}
+                </h3>
+            }
+            <button type="submit">Złóż wniosek</button>
+        </form>
+    }
 </div>
