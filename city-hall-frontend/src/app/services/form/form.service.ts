@@ -3,16 +3,18 @@ import { Injectable } from '@angular/core';
 import { FormConfig, FormDataSchema, FormFieldConfig, FormSectionConfig, SCHEMA_PROPERTIES_TYPES, SchemaObjectProperties, SchemaProperties, SchemaStringProperties } from '../../components/features/form/form.types';
 import { Observable } from 'rxjs';
 import { Validators, ValidatorFn, AbstractControl, ValidationErrors } from '@angular/forms';
+import { environment } from '../../../../environments/environment'; 
 
 @Injectable({
   providedIn: 'root'
 })
 export class FormService {
+  private apiUrl = `${environment.apiUrl}/form`;
 
   constructor(private http: HttpClient) { }
 
   getFormSchema(): Observable<FormDataSchema> {
-    return this.http.get<FormDataSchema>('/schema.json');
+    return this.http.get<FormDataSchema>(this.apiUrl);
   }
 
   getFormConfig(schema: FormDataSchema): FormConfig {

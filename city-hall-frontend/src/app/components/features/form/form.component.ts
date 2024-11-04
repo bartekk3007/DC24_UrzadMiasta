@@ -61,7 +61,8 @@ export class FormComponent implements OnInit {
   }
 
   private getFormSections = () => this.getFormSectionNames().map(sectionName => ({
-    title: sectionName
+    title: sectionName,
+    fields: []
   })); 
 
   private getFormSectionNames = () => Object.keys(this.schema.properties).map(key => this.getFormSectionName(key));
