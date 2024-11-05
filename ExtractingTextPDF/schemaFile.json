@@ -6,50 +6,113 @@
     "Miejscowość i data": {
       "type": "string"
     },
-    "Imię/Imiona": {
-      "type": "string"
+    "Dane osobowe wnioskodawcy/wnioskodawczyni": {
+      "type": "object",
+      "properties": {
+        "Imię/Imiona": {
+          "type": "string"
+        },
+        "Nazwisko": {
+          "type": "string"
+        },
+        "Data urodzenia": {
+          "type": "string"
+        },
+        "Płeć": {
+          "type": "string",
+          "description": "kobieta / mężczyzna"
+        },
+        "Nazwisko rodowe": {
+          "type": "string"
+        },
+        "Miejsce urodzenia": {
+          "type": "string"
+        },
+        "Obywatelstwo": {
+          "type": "string",
+          "description": "polskie / inne"
+        }
+      },
+      "required": [
+        "Imię/Imiona",
+        "Nazwisko",
+        "Data urodzenia",
+        "Płeć",
+        "Nazwisko rodowe",
+        "Miejsce urodzenia",
+        "Obywatelstwo"
+      ]
     },
-    "Nazwisko": {
-      "type": "string"
-    },
-    "Data urodzenia": {
-      "type": "string"
-    },
-    "Płeć": {
-      "type": "string",
-      "description": "kobieta / mężczyzna"
-    },
-    "Nazwisko rodowe": {
-      "type": "string"
-    },
-    "Miejsce urodzenia": {
-      "type": "string"
-    },
-    "Obywatelstwo": {
-      "type": "string",
-      "description": "polskie / inne"
-    },
-    "Ulica": {
-      "type": "string"
-    },
-    "Numer domu/lokalu": {
-      "type": "string"
-    },
-    "Kod pocztowy": {
-      "type": "string"
-    },
-    "Miejscowość": {
-      "type": "string"
-    },
-    "Nr. telefonu (opcjonalny)": {
-      "type": "string"
-    },
-    "Adres e-mail (opcjonalny)": {
-      "type": "string"
+    "Dane kontaktowe wnioskodawcy/wnioskodawczyni": {
+      "type": "object",
+      "properties": {
+        "Ulica": {
+          "type": "string"
+        },
+        "Numer domu/lokalu": {
+          "type": "string"
+        },
+        "Kod pocztowy": {
+          "type": "string"
+        },
+        "Miejscowość": {
+          "type": "string"
+        },
+        "Nr. telefonu (opcjonalny)": {
+          "type": "string"
+        },
+        "Adres e-mail (opcjonalny)": {
+          "type": "string"
+        }
+      },
+      "required": [
+        "Ulica",
+        "Numer domu/lokalu",
+        "Kod pocztowy",
+        "Miejscowość"
+      ]
     },
     "Powód złożenia wniosku": {
       "type": "string",
-      "description": "Pierwszy dowód / Zmiana danych osobowych / Upływ terminu ważności dowodu / Zagubienie/utrata dowodu / Uszkodzenie dowodu / Kradzież tożsamości / inny"
+      "description": "Pierwszy dowód / Zmiana danych osobowych / Upływ terminu ważności dowodu / Zagubienie/utrata dowodu / Kradzież dowodu / Uszkodzenie dowodu / Kradzież tożsamości / inny"
+    },
+    "Dane poprzedniego dowodu osobistego": {
+      "type": "object",
+      "properties": {
+        "Numer dowodu osobistego": {
+          "type": "string"
+        },
+        "Numer CAN": {
+          "type": "string"
+        },
+        "Data wydania dowodu": {
+          "type": "string"
+        },
+        "Organ wydający dowód": {
+          "type": "string"
+        }
+      },
+      "required": [
+        "Numer dowodu osobistego",
+        "Numer CAN",
+        "Data wydania dowodu",
+        "Organ wydający dowód"
+      ]
+    },
+    "Dane dotyczące zgłoszenia kradzieży dowodu": {
+      "type": "object",
+      "properties": {
+        "Nazwa i adres jednostki policji": {
+          "type": "string"
+        },
+        "Data zgłoszenia": {
+          "type": "string"
+        }
+      },
+      "required": [
+        "Nazwa i adres jednostki policji",
+        "Data zgłoszenia"
+      ]
     },
     "Fotografia": {
       "type": "string",
@@ -58,18 +121,11 @@
   },
   "required": [
     "Miejscowość i data",
-    "Imię/Imiona",
-    "Nazwisko",
-    "Data urodzenia",
-    "Płeć",
-    "Nazwisko rodowe",
-    "Miejsce urodzenia",
-    "Obywatelstwo",
-    "Ulica",
-    "Numer domu/lokalu",
-    "Kod pocztowy",
-    "Miejscowość",
+    "Dane osobowe wnioskodawcy/wnioskodawczyni",
+    "Dane kontaktowe wnioskodawcy/wnioskodawczyni",
     "Powód złożenia wniosku",
+    "Dane poprzedniego dowodu osobistego",
+    "Dane dotyczące zgłoszenia kradzieży dowodu",
     "Fotografia"
   ]
 }
