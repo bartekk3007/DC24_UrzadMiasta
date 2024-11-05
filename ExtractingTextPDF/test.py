@@ -28,7 +28,8 @@ for line in lines:
    key_value = line.split(':', 1)
    if len(line) > 1 and line[0].isdigit() and line[1] == "." and line[3:] != "Podpis":
       section = line[3:]
-      schema["required"].append(section)
+      if section != "Dane poprzedniego dowodu osobistego" and section != "Dane dotyczące zgłoszenia kradzieży dowodu":
+         schema["required"].append(section)
       schema["properties"][section] = {
          "type": "object",
          "properties": {},
