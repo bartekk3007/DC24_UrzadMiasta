@@ -115,10 +115,6 @@ def camunda_page():
 
         return jsonify(response.json()), response.status_code
 
-    # Wyswietlanie domyslnej strony
-    return render_template('camunda_page.html')
-
-
 if __name__ == '__main__':
     app.run(host='0.0.0.0', port=5000, debug=True)
     
