@@ -23,6 +23,9 @@ def generate_pdf():
 
         response = make_response(BytesIO(pdf.getbuffer()))
         response.headers['Content-Type'] = 'application/pdf'
-        response.headers['Content-Disposition'] = 'inline; filename=%s.pdf' % 'yourfilename'
+        response.headers['Content-Disposition'] = 'inline; filename=wniosek.pdf'
         return response
     abort(404)
+
+if __name__ == "__main__":
+    app.run(debug=True)
