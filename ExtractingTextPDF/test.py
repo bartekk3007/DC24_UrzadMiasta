@@ -1,6 +1,6 @@
 import pymupdf
 import json
-doc = pymupdf.open('wniosekUMPusty.pdf')
+doc = pymupdf.open('NowyWniosekUM.pdf')
 text = ""
 for page in doc:
    text+=page.get_text()
@@ -26,21 +26,30 @@ schema["required"].append("Miejscowość i data")
 lines = text.split('\n')
 for line in lines:
    key_value = line.split(':', 1)
-   if len(key_value) == 2:
+   if len(line) > 1 and line[0].isdigit() and line[1] == "." and line[3:] != "Podpis":
+      section = line[3:]
+      if section != "Dane poprzedniego dowodu osobistego" and section != "Dane dotyczące zgłoszenia kradzieży dowodu":
+         schema["required"].append(section)
+      schema["properties"][section] = {
+         "type": "object",
+         "properties": {},
+         "required": []
+      }
+   elif len(key_value) == 2 and not key_value[0].startswith("("):
       key = key_value[0]
       value = key_value[1].replace('…','').replace('.','').replace(':','').replace('-','').strip()
       if key_value[0] != "inny" and key_value[0] != "Fotografia załączona razem z wnioskiem":
          if value:
-            schema["properties"][key] = {
+            schema["properties"][section]["properties"][key] = {
                "type": "string",
                "description": value
             }
          else:
-            schema["properties"][key] = {
+            schema["properties"][section]["properties"][key] = {
                "type": "string",
             }
          if "opcjonalny" not in key:
-            schema["required"].append(key)
+            schema["properties"][section]["required"].append(key)
 
 lines = text.split('\n')
 optionsList = []
@@ -58,7 +67,6 @@ for index, line in enumerate(lines):
          "type": "string",
          "description": " / ".join(optionsList[1:])
       }
-      schema["required"].append(optionsList[0])
       optionsList.clear()
 
 print(schema)
