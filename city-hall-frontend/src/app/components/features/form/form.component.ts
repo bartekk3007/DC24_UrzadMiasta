@@ -2,20 +2,24 @@ import { Component, OnInit } from '@angular/core';
 import { FormBuilder, FormGroup, Validators, FormControl, ReactiveFormsModule } from '@angular/forms';
 import { HttpClient, HttpClientModule } from '@angular/common/http';
 import { CommonModule } from '@angular/common';
-import { FormConfig, FormDataSchema, SCHEMA_PROPERTIES_TYPES, SchemaProperties } from './form.types';
+import { FormConfig, FormDataSchema, FormFieldConfig, SCHEMA_PROPERTIES_TYPES, SchemaProperties } from './form.types';
 import { FormService } from '../../../services/form/form.service';
+import { FormSectionComponent } from '../form-section/form-section.component';
 
 @Component({
   selector: 'app-form',
   templateUrl: './form.component.html',
   styleUrls: ['./form.component.scss'],
   standalone: true,
-  imports: [ReactiveFormsModule, CommonModule, HttpClientModule],
+  imports: [ReactiveFormsModule, CommonModule, HttpClientModule, FormSectionComponent],
 })
 export class FormComponent implements OnInit {
   identityForm!: FormGroup;
   schema!: FormDataSchema;
   formConfig!: FormConfig;
+  formData: {
+    [key: string]: string
+  } = {};
 
   constructor(private fb: FormBuilder, private formService: FormService) {}
 
@@ -24,62 +28,38 @@ export class FormComponent implements OnInit {
       next: (data: FormDataSchema) => {
         this.schema = data;
         console.log(data);
-        this.buildForm();
+        const config = this.formService.getFormConfig(this.schema);
+        console.log(config);
+        this.formConfig = config;
+        this.initFormData();
       },
       error: (err) => console.error('Schema loading error', err),
     });
   }
 
-  buildForm() {
-    const formControls: any = {};
-    for (const field in this.schema.properties) {
-      formControls[field] = new FormControl('', this.getValidators(field));
+  private initFormData() {
+    this.formConfig.sections.forEach(section => {
+      section.fields.forEach(field => {
+        const key: string = field.label ? field.label : section.title;
+        this.formData[key] = '';
+      })
+    })
+  }
+
+  getFormLabel(field: FormFieldConfig) {
+    if (field.label) {
+      return field.required ? `${field.label} *` : field.label;  
     }
-
-    this.buildFormConfig();
-
-    this.identityForm = new FormGroup(formControls);
-    console.log(this.identityForm);
+    return '';
   }
 
-  getValidators(field: string) {
-    const validators = [];
-    const fieldSchema = this.schema.properties[field];
-
-    // Add required validator
-    if (this.schema.required?.includes(field)) {
-      validators.push(Validators.required);
-    }
-
-    return validators;
+  isDateField(field: FormFieldConfig) {
+    return field.label && field.label.includes('Data');
   }
 
-  private buildFormConfig() {
-    this.formConfig = {
-      sections: this.getFormSections()
-    }
+  isEmailField(field: FormFieldConfig) {
+    return field.label && field.label.includes('e-mail');
   }
-
-  private getFormSections = () => this.getFormSectionNames().map(sectionName => ({
-    title: sectionName,
-    fields: []
-  })); 
-
-  private getFormSectionNames = () => Object.keys(this.schema.properties).map(key => this.getFormSectionName(key));
-
-  private getFormSectionName = (formControl: string) => {
-    // First letter to uppercase
-    formControl = formControl.charAt(0).toUpperCase() + formControl.slice(1);
-    return formControl.split(/(?=[A-Z])/).join(' ');    
-  }
-
-  private getFormControls(): string[] {
-    return Object.keys(this.schema.properties || {});
-  }
-
-  areStringTypeProps = (schemaProperties: SchemaProperties, fieldName: string) => schemaProperties[fieldName].type === SCHEMA_PROPERTIES_TYPES.STRING;
-  
-  areObjectTypeProps = (schemaProperties: SchemaProperties, fieldName: string) => schemaProperties[fieldName].type === SCHEMA_PROPERTIES_TYPES.OBJECT;
 
   onSubmit() {
     if (this.identityForm.valid) {

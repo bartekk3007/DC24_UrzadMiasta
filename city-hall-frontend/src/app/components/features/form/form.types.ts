@@ -8,7 +8,7 @@ export const SCHEMA_PROPERTIES_TYPES = {
 export type SchemaStringProperties = {
     type: typeof SCHEMA_PROPERTIES_TYPES.STRING;
     contentEncoding?: string;
-    enum?: string[];
+    description?: string;
     pattern?: string;
     format?: string;
 };
@@ -35,6 +35,8 @@ export type FormFieldConfig = {
     label?: string;
     validators?: ValidatorFn[];
     required: boolean;
+    options?: string[];
+    key: string;
 };
 
 export type FormSectionConfig = {

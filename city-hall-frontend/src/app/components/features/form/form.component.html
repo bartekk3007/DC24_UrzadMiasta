@@ -1,16 +1,37 @@
 <div id="formWrapper">
-    @if (schema && identityForm && formConfig) {
-        
-        <form [formGroup]="identityForm" (ngSubmit)="onSubmit()" id="form">
-            <h2 id="form-title">
-                {{ schema.title }}
-            </h2>
-            @for (section of formConfig.sections; track $index) {
+    @if (schema && formConfig) {
+
+    <form (ngSubmit)="onSubmit()" id="form">
+        <h2 id="form-title">
+            {{ schema.title }}
+        </h2>
+        @for (section of formConfig.sections; track $index) {
+            <section class="form-section">
                 <h3>
                     {{ section.title }}
                 </h3>
-            }
-            <button type="submit">Złóż wniosek</button>
-        </form>
+                @for (field of section.fields; track $index) {
+                    <div>
+                        <label>{{ getFormLabel(field) }} </label>
+                        @if (field.options) {
+                            <select class="form-input" name="" id="">
+                                @for (option of field.options; track $index) {
+                                    <option [value]="option">{{ option }}</option>
+                                }
+                            </select>
+                        } @else if (isDateField(field)) {
+                            <input class="form-input" type="date"/>
+                        } @else if(isEmailField(field)) {
+                            <input class="form-input" type="email"/>
+                        } 
+                        @else {
+                            <input class="form-input" type="text" [required]="field.required" />
+                        }
+                    </div>
+                }
+            </section>
+        }
+        <button type="submit">Złóż wniosek</button>
+    </form>
     }
 </div>

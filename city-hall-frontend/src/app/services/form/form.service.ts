@@ -55,11 +55,19 @@ export class FormService {
     return sectionConfig;
   }
 
+  private getFieldOptions(description: string) {
+    return description.split(' /');
+  }
+
   private getFormStringField(stringProperties: SchemaStringProperties, isRequired: boolean, label: string | undefined = undefined): FormFieldConfig {
+    const key = '';
+
     const fieldConfig: FormFieldConfig = {
       required: isRequired,
       validators: this.getFieldValidators(stringProperties),
-      label: label ? label : undefined
+      label: label ? label : undefined,
+      options: stringProperties.description ? this.getFieldOptions(stringProperties.description) : undefined,
+      key
     };
     
     return fieldConfig;
@@ -79,12 +87,6 @@ export class FormService {
  
   private getFieldValidators(stringProperties: SchemaStringProperties) {
     const validators: ValidatorFn[] = [];
-
-    if (stringProperties.enum) {
-        validators.push((control: AbstractControl): ValidationErrors | null => {
-            return stringProperties.enum!.includes(control.value) ? null : { enum: true };
-        });
-    }
 
     if (stringProperties.pattern) {
         validators.push(Validators.pattern(new RegExp(stringProperties.pattern)));

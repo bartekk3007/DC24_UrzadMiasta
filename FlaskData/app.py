@@ -4,6 +4,7 @@ import requests
 from flask import Flask, request, render_template, jsonify, json, send_from_directory
 from flask_cors import CORS
 import os
+from utils.generate_schema.generate_schema import generate_schema
 
 app = Flask(__name__)
 CORS(app)
@@ -12,11 +13,12 @@ CORS(app)
 def get_form_schema():
     if request.method == 'GET':
         try:
-            schema_dir = os.path.join(os.getcwd(), 'schema')
+            generate_schema()
+            schema_dir = app.root_path
             return send_from_directory(schema_dir, 'schemaFile.json', as_attachment=True)
         except Exception as e:
             print(f"Error sending file: {e}")
-            return jsonify({"error": "Error sending the schema file"}), 500
+            return jsonify({"error": f"Error sending the schema file: {e}"}), 500
 
 
 @app.route('/Camunda', methods=['GET', 'POST'])

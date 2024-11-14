@@ -1,4 +1,4 @@
-import { Component } from '@angular/core';
+import { Component, Input } from '@angular/core';
 
 @Component({
   selector: 'app-form-section',
@@ -8,5 +8,4 @@ import { Component } from '@angular/core';
   styleUrl: './form-section.component.scss'
 })
 export class FormSectionComponent {
-
 }
