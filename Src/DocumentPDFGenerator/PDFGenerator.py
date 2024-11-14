@@ -92,7 +92,7 @@ class PDFGenerator:
 
         for n, (k, v) in enumerate(json.items(), 1):
 
-            self.__addParagraph(body, f"{n}. {k}")
+            self.__addParagraph(body, f"{n}. {self.__genderParagraph(k, json["Dane osobowe wnioskodawcy/wnioskodawczyni"]["Płeć"] == "kobieta")}")
 
             self.__addContent(body, k, v)
 
@@ -114,14 +114,31 @@ class PDFGenerator:
         
         return pdf
 
+    def __genderParagraph(self, txt: str, gender: int):
+
+        if '/' in txt:
+            tokens = txt.split(" ")
+            subtxt = ''
+            for t in tokens:
+                if '/' in t:
+                    subtxt += t.split('/')[gender]
+                else:
+                    subtxt += t + ' '
+            txt = subtxt
+
+        return txt
+
     def __addContent(self, body: pymupdf.Xml, key, val):
 
         if type(val) is str:
             match key:
                 case "Fotografia":
-                    with open("temp.jpg", "wb") as img:
-                        img.write(base64.b64decode(val))
-                    image = body.add_image("./temp.jpg")
+                    if val == "Fotografia dostarczona przez email" or val == "Fotografia załączona razem z wnioskiem":
+                        self.__addItem(body, f"{val}")
+                    else:
+                        with open("temp.jpg", "wb") as img:
+                            img.write(base64.b64decode(val))
+                        image = body.add_image("./temp.jpg")
                 case _:
                     self.__addItem(body, f"{val}")
         else:
