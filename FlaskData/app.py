@@ -1,7 +1,10 @@
 import time
 
 import requests
-from flask import Flask, request, render_template, jsonify, json, send_from_directory
+from flask import Flask, request, render_template, jsonify, json, abort, make_response, send_from_directory
+from io import BytesIO
+from DocumentPDFGenerator.PDFGenerator import PDFGenerator
+import json as JSON
 from flask_cors import CORS
 import os
 from utils.generate_schema.generate_schema import generate_schema
@@ -20,6 +23,19 @@ def get_form_schema():
             print(f"Error sending file: {e}")
             return jsonify({"error": f"Error sending the schema file: {e}"}), 500
 
+
+@app.route('/generatePdf', methods=['POST'])
+def generate_pdf():
+    if request.method == 'POST':
+        
+        generator = PDFGenerator()
+        pdf = generator.render(request.json)
+
+        response = make_response(BytesIO(pdf.getbuffer()))
+        response.headers['Content-Type'] = 'application/pdf'
+        response.headers['Content-Disposition'] = 'inline; filename=wniosek.pdf'
+        return response
+    abort(404)
 
 @app.route('/Camunda', methods=['GET', 'POST'])
 def camunda_page():
