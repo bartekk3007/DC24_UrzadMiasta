@@ -1,7 +1,10 @@
 import time
 
 import requests
-from flask import Flask, request, render_template, jsonify, json
+from flask import Flask, request, render_template, jsonify, json, abort, make_response
+from io import BytesIO
+from DocumentPDFGenerator.PDFGenerator import PDFGenerator
+import json as JSON
 
 app = Flask(__name__)
 
@@ -13,6 +16,19 @@ def form_page():
         user_age = request.form['age']
         return f'Witam {user_name} {user_surname}, masz {user_age} lat!'
     return render_template('form.html')
+
+@app.route('/generatePdf', methods=['POST'])
+def generate_pdf():
+    if request.method == 'POST':
+        
+        generator = PDFGenerator()
+        pdf = generator.render(request.json)
+
+        response = make_response(BytesIO(pdf.getbuffer()))
+        response.headers['Content-Type'] = 'application/pdf'
+        response.headers['Content-Disposition'] = 'inline; filename=wniosek.pdf'
+        return response
+    abort(404)
 
 @app.route('/Camunda', methods=['GET', 'POST'])
 def camunda_page():
@@ -112,3 +128,6 @@ def camunda_page():
 
     # Wyswietlanie domyslnej strony
     return render_template('camunda_page.html')
+
+if __name__ == "__main__":
+    app.run()

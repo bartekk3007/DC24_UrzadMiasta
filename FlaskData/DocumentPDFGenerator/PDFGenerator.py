@@ -56,7 +56,7 @@ class PDFGenerator:
 
         schema = None
 
-        with open("./Src/DocumentPDFGenerator/WniosekJsonSchema.json", encoding="utf-8") as f:
+        with open("./FlaskData/DocumentPDFGenerator/WniosekJsonSchema.json", encoding="utf-8") as f:
             schema = JSON.load(f)
 
         try:
