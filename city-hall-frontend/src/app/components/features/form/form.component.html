@@ -6,32 +6,37 @@
             {{ schema.title }}
         </h2>
         @for (section of formConfig.sections; track $index) {
-            <section class="form-section">
-                <h3>
-                    {{ section.title }}
-                </h3>
-                @for (field of section.fields; track $index) {
-                    <div>
-                        <label>{{ getFormLabel(field) }} </label>
-                        @if (field.options) {
-                            <select class="form-input" name="" id="">
-                                @for (option of field.options; track $index) {
-                                    <option [value]="option">{{ option }}</option>
-                                }
-                            </select>
-                        } @else if (isDateField(field)) {
-                            <input class="form-input" type="date"/>
-                        } @else if(isEmailField(field)) {
-                            <input class="form-input" type="email"/>
-                        } 
-                        @else {
-                            <input class="form-input" type="text" [required]="field.required" />
-                        }
-                    </div>
-                }
-            </section>
+            @if (displaySection(section.title)) {
+                <section class="form-section">
+                    <h3>
+                        {{ section.title }}
+                    </h3>
+                    @for (field of section.fields; track $index) {
+                        <div>
+                            <label>{{ getFormLabel(field) }} </label>
+                            @if (field.options) {
+                                <select class="form-input" [name]="field.key" [(ngModel)]="formData[field.key]">
+                                    @for (option of field.options; track $index) {
+                                        <option [value]="option">{{ option }}</option>
+                                    }
+                                </select>
+                            } @else if (isDateField(field)) {
+                                <input class="form-input" type="date" [name]="field.key" [(ngModel)]="formData[field.key]"/>
+                            } @else if(isEmailField(field)) {
+                                <input class="form-input" type="email" [name]="field.key" [(ngModel)]="formData[field.key]"/>
+                            } 
+                            @else {
+                                <input class="form-input" type="text" [name]="field.key" [(ngModel)]="formData[field.key]" [required]="field.required" />
+                            }
+                        </div>
+                    }
+                </section>
+            }
         }
-        <button type="submit">Złóż wniosek</button>
+        <button [disabled]="!allRequiredFilled()" [ngClass]="{'btn-disabled': !allRequiredFilled()}" type="submit">Złóż wniosek</button>
+        @if (!allRequiredFilled()) {
+            <caption class="error-caption">Wypełnij wszystkie wymagane pola</caption>
+        }
     </form>
     }
 </div>

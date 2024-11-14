@@ -1,19 +1,34 @@
 import { Component, OnInit } from '@angular/core';
-import { FormBuilder, FormGroup, Validators, FormControl, ReactiveFormsModule } from '@angular/forms';
-import { HttpClient, HttpClientModule } from '@angular/common/http';
+import { FormBuilder, FormGroup, ReactiveFormsModule, FormsModule } from '@angular/forms';
 import { CommonModule } from '@angular/common';
-import { FormConfig, FormDataSchema, FormFieldConfig, SCHEMA_PROPERTIES_TYPES, SchemaProperties } from './form.types';
+import { FormConfig, FormDataSchema, FormFieldConfig } from './form.types';
 import { FormService } from '../../../services/form/form.service';
-import { FormSectionComponent } from '../form-section/form-section.component';
 
 @Component({
   selector: 'app-form',
   templateUrl: './form.component.html',
   styleUrls: ['./form.component.scss'],
   standalone: true,
-  imports: [ReactiveFormsModule, CommonModule, HttpClientModule, FormSectionComponent],
+  imports: [ReactiveFormsModule, CommonModule, FormsModule],
 })
 export class FormComponent implements OnInit {
+  private readonly REASON_KEY = 'Powód złożenia wniosku';
+  private readonly FIRST_ID_REASON = 'Pierwszy dowód';
+  private readonly IS_STOLEN_REASON = 'Kradzież dowodu';
+  private readonly PREV_ID_SECTION_TITLE = 'Dane poprzedniego dowodu osobistego';
+  private readonly ID_STOLEN_SECTION_TITLE = 'Dane dotyczące zgłoszenia kradzieży dowodu';
+  private readonly SEX_MEN = 'mężczyzna';
+  private readonly SEX_KEY = 'Płeć';
+  private readonly PREV_ID_KEYS = [
+    'Data wydania dowodu',
+    'Numer  C A N',
+    'Numer dowodu osobistego',
+    'Organ wydający dowód'
+  ];
+  private readonly STOLEN_ID_KEYS = [
+    'Data zgłoszenia',
+    'Nazwa i adres jednostki policji'
+  ];
   identityForm!: FormGroup;
   schema!: FormDataSchema;
   formConfig!: FormConfig;
@@ -40,8 +55,7 @@ export class FormComponent implements OnInit {
   private initFormData() {
     this.formConfig.sections.forEach(section => {
       section.fields.forEach(field => {
-        const key: string = field.label ? field.label : section.title;
-        this.formData[key] = '';
+        this.formData[field.key] = '';
       })
     })
   }
@@ -61,11 +75,75 @@ export class FormComponent implements OnInit {
     return field.label && field.label.includes('e-mail');
   }
 
-  onSubmit() {
-    if (this.identityForm.valid) {
-      console.log('Form submitted', this.identityForm.value);
+  displaySection(sectionTitle: string) {
+    if (!this.isPreviousIdSection(sectionTitle) && !this.isIdStolenSection(sectionTitle)) {
+      return true;
     } else {
-      console.log('Form is invalid');
+      if (this.isPreviousIdSection(sectionTitle)) {
+        return this.displayPreviousDocumentSection();
+      }
+      return this.displayStolenDocumentSection();
     }
+  }
+
+  isMen() {
+    return this.formData[this.SEX_KEY] && this.formData[this.SEX_KEY].includes(this.SEX_MEN);
+  }
+
+  private isPreviousIdSection(sectionTitle: string): boolean {
+    return sectionTitle.includes(this.PREV_ID_SECTION_TITLE);
+  }
+
+  private isIdStolenSection(sectionTitle: string): boolean {
+    return sectionTitle.includes(this.ID_STOLEN_SECTION_TITLE);
+  }
+
+  private displayPreviousDocumentSection() {
+    return this.formData[this.REASON_KEY] && !this.formData[this.REASON_KEY].includes(this.FIRST_ID_REASON);
+  }
+
+  private displayStolenDocumentSection() {
+    return this.formData[this.REASON_KEY] && this.formData[this.REASON_KEY].includes(this.IS_STOLEN_REASON);
+  }
+
+  isReasonField(sectionTitle: string) {
+    return sectionTitle.includes(this.REASON_KEY);
+  }
+
+  allRequiredFilled() {
+    const fields = this.formConfig.sections.flatMap(section => section.fields);
+    for (let field of fields) {
+      if (this.PREV_ID_KEYS.includes(field.key) && !this.displayPreviousDocumentSection()) {
+        continue;
+      }
+
+      if (this.STOLEN_ID_KEYS.includes(field.key) && !this.displayStolenDocumentSection()) {
+        continue;
+      }
+
+      if (field.required && this.formData[field.key] === '') {
+        return false;
+      }
+    }
+
+    return true;
+  }
+
+  adjustFormData() {
+    if (!this.displayPreviousDocumentSection()) {
+      this.PREV_ID_KEYS.forEach(key => {
+        delete this.formData[key];
+      });
+    }
+    if (!this.displayStolenDocumentSection()) {
+      this.STOLEN_ID_KEYS.forEach(key => {
+        delete this.formData[key];
+      });
+    }
+  }
+
+  onSubmit() {
+    this.adjustFormData();
+    console.log(this.formData);
   }
 }

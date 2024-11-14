@@ -47,7 +47,7 @@ export class FormService {
     }
 
     if (this.isStringTypeProperty(properties)) {
-      sectionConfig.fields.push(this.getFormStringField(properties, isRequired));
+      sectionConfig.fields.push(this.getFormStringField(properties, isRequired, undefined, sectionTitle));
     } else {
       sectionConfig.fields.push(...this.getFormObjectFields(properties));
     }
@@ -59,15 +59,15 @@ export class FormService {
     return description.split(' /');
   }
 
-  private getFormStringField(stringProperties: SchemaStringProperties, isRequired: boolean, label: string | undefined = undefined): FormFieldConfig {
-    const key = '';
+  private getFormStringField(stringProperties: SchemaStringProperties, isRequired: boolean, label: string | undefined = undefined, sectionTitle?: string): FormFieldConfig {
+    const key = label ? label : sectionTitle as string;
 
     const fieldConfig: FormFieldConfig = {
       required: isRequired,
       validators: this.getFieldValidators(stringProperties),
       label: label ? label : undefined,
       options: stringProperties.description ? this.getFieldOptions(stringProperties.description) : undefined,
-      key
+      key: key
     };
     
     return fieldConfig;
