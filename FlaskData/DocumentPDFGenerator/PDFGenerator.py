@@ -56,7 +56,7 @@ class PDFGenerator:
 
         schema = None
 
-        with open("./FlaskData/DocumentPDFGenerator/WniosekJsonSchema.json", encoding="utf-8") as f:
+        with open(f"{os.path.dirname(__file__)}/WniosekJsonSchema.json", encoding="utf-8") as f:
             schema = JSON.load(f)
 
         try:
@@ -133,7 +133,7 @@ class PDFGenerator:
         if type(val) is str:
             match key:
                 case "Fotografia":
-                    if val == "Fotografia dostarczona przez email" or val == "Fotografia załączona razem z wnioskiem":
+                    if val.strip() == "Fotografia dostarczona przez email" or val.strip() == "Fotografia załączona razem z wnioskiem":
                         self.__addItem(body, f"{val}")
                     else:
                         with open("temp.jpg", "wb") as img:

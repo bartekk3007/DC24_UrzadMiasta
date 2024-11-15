@@ -3,6 +3,7 @@ import { FormBuilder, FormGroup, ReactiveFormsModule, FormsModule } from '@angul
 import { CommonModule } from '@angular/common';
 import { FormConfig, FormDataSchema, FormFieldConfig } from './form.types';
 import { FormService } from '../../../services/form/form.service';
+import { saveAs } from 'file-saver';
 
 @Component({
   selector: 'app-form',
@@ -142,8 +143,51 @@ export class FormComponent implements OnInit {
     }
   }
 
+  formDataToJSON(formData: {[key: string]: string}){
+    let json : {[key: string]: any} = {
+      "Miejscowość i data": formData["Miejscowość i data"],
+      "Dane osobowe wnioskodawcy/wnioskodawczyni": {
+        "Imię/Imiona": formData["Imię/ Imiona"],
+        "Nazwisko": formData["Nazwisko"],
+        "Data urodzenia": formData["Data urodzenia"],
+        "Płeć": formData["Płeć"],
+        "Nazwisko rodowe": formData["Nazwisko rodowe"],
+        "Miejsce urodzenia": formData["Miejsce urodzenia"],
+        "Obywatelstwo": formData["Obywatelstwo"]
+      },
+      "Dane kontaktowe wnioskodawcy/wnioskodawczyni": {
+        "Ulica": formData["Ulica"],
+        "Numer domu/lokalu": formData["Numer domu/lokalu"],
+        "Kod pocztowy": formData["Kod pocztowy"],
+        "Miejscowość": formData["Miejscowość"],
+        "Nr. telefonu (opcjonalny)": (formData["Nr. telefonu (opcjonalny)"] == "")? undefined : formData["Nr. telefonu (opcjonalny)"],
+        "Adres e-mail (opcjonalny)": (formData["Adres e-mail (opcjonalny)"] == "")? undefined : formData["Adres e-mail (opcjonalny)"]
+      },
+      "Powód złożenia wniosku": formData["Powód złożenia wniosku"],
+      "Dane poprzedniego dowodu osobistego": ("Numer  C A N" in formData)? {
+        "Numer dowodu osobistego": formData["Numer dowodu osobistego"],
+        "Numer CAN": formData["Numer  C A N"],
+        "Data wydania dowodu": formData["Data wydania dowodu"],
+        "Organ wydający dowód": formData["Organ wydający dowód"]
+      } : undefined,
+      "Dane dotyczące zgłoszenia kradzieży dowodu": ("Nazwa i adres jednostki policji" in formData)? {
+        "Nazwa i adres jednostki policji": formData["Nazwa i adres jednostki policji"],
+        "Data zgłoszenia": formData["Data zgłoszenia"]
+      } : undefined,
+      "Fotografia": formData["Fotografia"]
+    };
+
+    console.log(json);
+
+    this.formService.getPDF(json).subscribe(
+      res => saveAs(res.body, "wniosek.pdf")
+    );
+
+  }
+
   onSubmit() {
     this.adjustFormData();
     console.log(this.formData);
+    this.formDataToJSON(this.formData);
   }
 }
