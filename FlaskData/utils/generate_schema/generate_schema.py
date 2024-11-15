@@ -1,10 +1,13 @@
 import pymupdf
 import json
-doc = pymupdf.open('NowyWniosekUM.pdf')
-text = ""
-for page in doc:
-   text+=page.get_text()
-# print(text)
+
+
+def generate_schema():
+   doc = pymupdf.open('utils/generate_schema/NowyWniosekUM.pdf')
+   text = ""
+   for page in doc:
+      text+=page.get_text()
+   # print(text)
 
    file = open('content.txt', 'w', encoding="utf-8")
    file.write(text)
@@ -69,8 +72,8 @@ for page in doc:
          }
          optionsList.clear()
 
-   print(schema)
-   print(json.dumps(schema, indent=2, ensure_ascii=False))  # Wyświetlenie struktury JSON
+   # print(schema)
+   # print(json.dumps(schema, indent=2, ensure_ascii=False))  # Wyświetlenie struktury JSON
    with open('schemaFile.json', 'w', encoding='utf-8') as json_file:
       json.dump(schema, json_file, indent=2, ensure_ascii=False)
 
@@ -95,3 +98,4 @@ for line in lines:
 print(json.dumps(json_schema, indent=2, ensure_ascii=False))  # Wyświetlenie struktury JSON
 with open('output_schema.json', 'w', encoding='utf-8') as json_file:
    json.dump(json_schema, json_file, indent=2, ensure_ascii=False)
+'''

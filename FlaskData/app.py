@@ -1,21 +1,28 @@
 import time
 
 import requests
-from flask import Flask, request, render_template, jsonify, json, abort, make_response
+from flask import Flask, request, render_template, jsonify, json, abort, make_response, send_from_directory
 from io import BytesIO
 from DocumentPDFGenerator.PDFGenerator import PDFGenerator
 import json as JSON
+from flask_cors import CORS
+import os
+from utils.generate_schema.generate_schema import generate_schema
 
 app = Flask(__name__)
+CORS(app)
 
-@app.route('/', methods=['GET', 'POST'])
-def form_page():
-    if request.method == 'POST':
-        user_name = request.form['name']
-        user_surname = request.form['surname']
-        user_age = request.form['age']
-        return f'Witam {user_name} {user_surname}, masz {user_age} lat!'
-    return render_template('form.html')
+@app.route('/form', methods=['GET', 'POST'])
+def get_form_schema():
+    if request.method == 'GET':
+        try:
+            generate_schema()
+            schema_dir = app.root_path
+            return send_from_directory(schema_dir, 'schemaFile.json', as_attachment=True)
+        except Exception as e:
+            print(f"Error sending file: {e}")
+            return jsonify({"error": f"Error sending the schema file: {e}"}), 500
+
 
 @app.route('/generatePdf', methods=['POST'])
 def generate_pdf():
@@ -177,8 +184,6 @@ def camunda_page():
 
         return jsonify(response.json()), response.status_code
 
-    # Wyswietlanie domyslnej strony
-    return render_template('camunda_page.html')
-
-if __name__ == "__main__":
-    app.run()
+if __name__ == '__main__':
+    app.run(host='0.0.0.0', port=5000, debug=True)
+    
