@@ -68,18 +68,18 @@ def camunda_page():
         tasklist_token = response.json()['access_token']
 
 
-        # Uruchomienie procesu
-        webhook = 'UrzadWebhook'
-        url = 'https://bru-2.connectors.camunda.io/eea87386-0393-4bbc-ad2e-a10a85bb2646/inbound/{0}'.format(webhook)
-        headers = {
-            'Content-Type': 'text/plain'
-        }
-        data = {
-
-        }
-        data = json.dumps(data)
-        response = requests.post(url, headers=headers, data=data)
-        time.sleep(5)
+        # # Uruchomienie procesu
+        # webhook = 'UrzadWebhook'
+        # url = 'https://bru-2.connectors.camunda.io/eea87386-0393-4bbc-ad2e-a10a85bb2646/inbound/{0}'.format(webhook)
+        # headers = {
+        #     'Content-Type': 'text/plain'
+        # }
+        # data = {
+        #
+        # }
+        # data = json.dumps(data)
+        # response = requests.post(url, headers=headers, data=data)
+        # time.sleep(5)
 
         # Uzyskanie klucza umozliwiajacego znalezienie procesu
 
@@ -106,23 +106,74 @@ def camunda_page():
         response = requests.post(url, headers=headers, data=data)
         json_data = response.json()
         process_definition_key = json_data['items'][0]['key']
-        print(process_definition_key)
+        print("Process definition key is: {0}".format(process_definition_key))
+
+        #
+        # # Uzyskanie formularza z danego procesu
+        #
+        # form="dane_osobowe"
+        # url = "https://bru-2.tasklist.camunda.io/eea87386-0393-4bbc-ad2e-a10a85bb2646/v1/forms/{0}?processDefinitionKey={1}".format(form, process_definition_key)
+        # headers = {
+        #     'Content-Type': 'application/json',
+        #     'Authorization': 'Bearer {0}'.format(tasklist_token),
+        #     'Accept': 'application/json'
+        # }
+        # data = {
+        # }
+        # # Wysylanie żadania POST z powyzszych zmiennych
+        # response = requests.get(url, headers=headers, data=data)
 
 
-        # Uzyskanie formularza z danego procesu
-
-        form="dane_osobowe"
-        url = "https://bru-2.tasklist.camunda.io/eea87386-0393-4bbc-ad2e-a10a85bb2646/v1/forms/{0}?processDefinitionKey={1}".format(form, process_definition_key)
+        # Uzyskanie aktualnego zadania
+        url = "https://bru-2.tasklist.camunda.io/eea87386-0393-4bbc-ad2e-a10a85bb2646/v1/tasks/search"
         headers = {
             'Content-Type': 'application/json',
             'Authorization': 'Bearer {0}'.format(tasklist_token),
             'Accept': 'application/json'
         }
         data = {
+            'processDefinitionKey': process_definition_key,
+            'pageSize': 1,
+            'sort': [
+                {
+                'field': 'creationTime',
+                'order': 'DESC'
+                }
+            ]
         }
-        # Wysylanie żadania POST z powyzszych zmiennych
-        response = requests.get(url, headers=headers, data=data)
+        data = json.dumps(data)
+        response = requests.post(url, headers=headers, data=data)
+        print(response.json())
+        task_id = response.json()[0]['id']
+        assignee = response.json()[0]['assignee']
 
+        # Zadeklarowanie zadania do użytkownika
+
+        url = "https://bru-2.tasklist.camunda.io/eea87386-0393-4bbc-ad2e-a10a85bb2646/v1/tasks/{0}/assign".format(task_id)
+        headers = {
+            'Content-Type': 'application/json',
+            'Authorization': 'Bearer {0}'.format(tasklist_token),
+            'Accept': 'application/json'
+        }
+        data = {
+          'assignee': '{0}'.format(assignee),
+          'allowOverrideAssignment': 'true'
+        }
+        response = requests.patch(url, headers=headers, data=data)
+
+
+        # Uzyskanie zmiennych dostępnych w danym zadaniu
+
+        url = "https://bru-2.tasklist.camunda.io/eea87386-0393-4bbc-ad2e-a10a85bb2646/v1/tasks/{0}/variables/search".format(task_id)
+        headers = {
+            'Content-Type': 'application/json',
+            'Authorization': 'Bearer {0}'.format(tasklist_token),
+            'Accept': 'application/json'
+        }
+        data = {}
+        response = requests.post(url, headers=headers, data=data)
+        variables = response.json()
+        print(variables)
 
         return jsonify(response.json()), response.status_code
 
