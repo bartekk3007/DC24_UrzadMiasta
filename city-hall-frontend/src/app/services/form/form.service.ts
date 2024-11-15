@@ -1,7 +1,7 @@
 import { HttpClient } from '@angular/common/http';
 import { Injectable } from '@angular/core';
 import { FormConfig, FormDataSchema, FormFieldConfig, FormSectionConfig, SCHEMA_PROPERTIES_TYPES, SchemaObjectProperties, SchemaProperties, SchemaStringProperties } from '../../components/features/form/form.types';
-import { Observable } from 'rxjs';
+import { map, Observable } from 'rxjs';
 import { Validators, ValidatorFn, AbstractControl, ValidationErrors } from '@angular/forms';
 import { environment } from '../../../../environments/environment'; 
 
@@ -10,11 +10,16 @@ import { environment } from '../../../../environments/environment';
 })
 export class FormService {
   private apiUrl = `${environment.apiUrl}/form`;
+  private pdfUrl = `${environment.apiUrl}/generatePdf`;
 
   constructor(private http: HttpClient) { }
 
   getFormSchema(): Observable<FormDataSchema> {
     return this.http.get<FormDataSchema>(this.apiUrl);
+  }
+
+  getPDF(json: {[key: string]: any}): Observable<any> {
+    return this.http.post<any>(this.pdfUrl, json, { observe: 'response', responseType: "blob" as "json"});
   }
 
   getFormConfig(schema: FormDataSchema): FormConfig {
