@@ -5,7 +5,8 @@
     align-items: center;
 }
 
-form {
+#form {
+    min-width: 800px;
     width: min(800px, 90%);
     margin-top: 2rem;
     background-color: rgba(255, 255, 255, 0.685);
@@ -14,7 +15,12 @@ form {
     padding: 2rem;
     display: flex;
     flex-direction: column;
-    gap: .5rem;
+    align-items: flex-start;
+    gap: 1rem;
+
+    #form-title {
+        align-self: center;
+    }
 
     #reasonSelect {
         display: flex;
@@ -22,18 +28,25 @@ form {
         gap: .5rem;
     }
 
+    h3 {
+        margin: 0;
+        padding: 0;
+    }
+
     div {
         display: flex;
         flex-direction: column;
         gap: .2rem;
-        label {
+        margin-bottom: .5rem;
 
-        }
-
-        input {
+        .form-input {
             padding: .2rem .4rem;
             font-size: 20px;
         }
+    }
+
+    .error-caption {
+        color: red;
     }
 
     button {
@@ -44,10 +57,19 @@ form {
         color: white;
         font-weight: bold;
         font-size: 24px;
+        width: 100%;
 
         &:hover {
             cursor: pointer;
             opacity: .9;
+        }
+    }
+
+    .btn-disabled {
+        opacity: .7;
+        &:hover {
+            opacity: .7;
+            cursor: not-allowed;
         }
     }
     // align-items: center;
