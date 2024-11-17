@@ -1,35 +1,18 @@
-<<<<<<< Updated upstream
-import { Component } from '@angular/core';
-import { FormBuilder, FormGroup, FormsModule, ReactiveFormsModule, Validators } from '@angular/forms';
-=======
 import { Component, OnInit } from '@angular/core';
 import { FormBuilder, FormGroup, ReactiveFormsModule, FormsModule } from '@angular/forms';
 import { CommonModule } from '@angular/common';
 import { FormConfig, FormDataSchema, FormFieldConfig } from './form.types';
 import { FormService } from '../../../services/form/form.service';
-import { saveAs } from 'file-saver';
 import {SubmitPopUpComponent} from '../submit-pop-up/submit-pop-up.component';
 import {MatDialog, MatDialogModule} from '@angular/material/dialog';
->>>>>>> Stashed changes
 
 @Component({
   selector: 'app-form',
-  standalone: true,
-  imports: [ReactiveFormsModule],
   templateUrl: './form.component.html',
-  styleUrl: './form.component.scss'
+  styleUrls: ['./form.component.scss'],
+  standalone: true,
+  imports: [ReactiveFormsModule, CommonModule, FormsModule],
 })
-<<<<<<< Updated upstream
-export class FormComponent {
-  readonly GENDERS = {
-    MALE: 'male',
-    FEMALE: 'female'
-  } as const;
-
-  readonly REASONS = {
-    OTHER: 'other'
-  } as const;
-=======
 export class FormComponent implements OnInit {
   private readonly REASON_KEY = 'Powód złożenia wniosku';
   private readonly FIRST_ID_REASON = 'Pierwszy dowód';
@@ -57,56 +40,21 @@ export class FormComponent implements OnInit {
   json : {[key: string]: any};
 
   constructor(private fb: FormBuilder, private formService: FormService, private dialog: MatDialog) {}
->>>>>>> Stashed changes
 
-  displayDifferentReasonInput: boolean = false;
-
-  identityForm: FormGroup;
-  currentGender: typeof this.GENDERS[keyof typeof this.GENDERS] = this.GENDERS.MALE;
-  readonly TITLES = {
-    'male': 'wnioskodawcy',
-    'female': 'wnioskodawczyni'
-  };
-
-  constructor(private fb: FormBuilder) {
-    this.identityForm = this.fb.group({
-      firstName: ['', Validators.required],
-      lastName: ['', Validators.required],
-      birthDate: ['', Validators.required],
-      gender: [this.GENDERS.MALE, Validators.required],
-      familyName: [''],
-      birthPlace: ['', Validators.required],
-      citizenship: ['', Validators.required],
-      street: ['', Validators.required],
-      houseNumber: ['', Validators.required],
-      postalCode: ['', Validators.required],
-      city: ['', Validators.required],
-      phoneNumber: [''],
-      email: [''],
-      reason: ['', Validators.required],
-      otherReason: [''],
-      photoMethod: ['', Validators.required],
-      applicantSignature: ['', Validators.required],
-    });
-
-    this.identityForm.get('gender')?.valueChanges.subscribe(value => {
-      this.currentGender = value;
-    });
-
-    this.identityForm.get('reason')?.valueChanges.subscribe(value => {
-      const reason = value;
-      this.displayDifferentReasonInput = reason === this.REASONS.OTHER;
+  ngOnInit(): void {
+    this.formService.getFormSchema().subscribe({
+      next: (data: FormDataSchema) => {
+        this.schema = data;
+        console.log(data);
+        const config = this.formService.getFormConfig(this.schema);
+        console.log(config);
+        this.formConfig = config;
+        this.initFormData();
+      },
+      error: (err) => console.error('Schema loading error', err),
     });
   }
 
-<<<<<<< Updated upstream
-  onSubmit() {
-    if (this.identityForm.valid) {
-      console.log('Form submitted', this.identityForm.value);
-    } else {
-      console.log('Form is invalid');
-    }
-=======
   private initFormData() {
     this.formConfig.sections.forEach(section => {
       section.fields.forEach(field => {
@@ -242,8 +190,5 @@ export class FormComponent implements OnInit {
     let dialogRef = this.dialog.open(SubmitPopUpComponent, {
       data: { json: this.json },
     });
->>>>>>> Stashed changes
   }
-
-  getTitleForGender = () => this.TITLES[this.currentGender];
 }
