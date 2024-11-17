@@ -3,7 +3,8 @@ import { FormBuilder, FormGroup, ReactiveFormsModule, FormsModule } from '@angul
 import { CommonModule } from '@angular/common';
 import { FormConfig, FormDataSchema, FormFieldConfig } from './form.types';
 import { FormService } from '../../../services/form/form.service';
-import { saveAs } from 'file-saver';
+import {SubmitPopUpComponent} from '../submit-pop-up/submit-pop-up.component';
+import {MatDialog, MatDialogModule} from '@angular/material/dialog';
 
 @Component({
   selector: 'app-form',
@@ -36,8 +37,9 @@ export class FormComponent implements OnInit {
   formData: {
     [key: string]: string
   } = {};
+  json : {[key: string]: any};
 
-  constructor(private fb: FormBuilder, private formService: FormService) {}
+  constructor(private fb: FormBuilder, private formService: FormService, private dialog: MatDialog) {}
 
   ngOnInit(): void {
     this.formService.getFormSchema().subscribe({
@@ -63,7 +65,7 @@ export class FormComponent implements OnInit {
 
   getFormLabel(field: FormFieldConfig) {
     if (field.label) {
-      return field.required ? `${field.label} *` : field.label;  
+      return field.required ? `${field.label} *` : field.label;
     }
     return '';
   }
@@ -144,7 +146,7 @@ export class FormComponent implements OnInit {
   }
 
   formDataToJSON(formData: {[key: string]: string}){
-    let json : {[key: string]: any} = {
+    this.json = {
       "Miejscowość i data": formData["Miejscowość i data"],
       "Dane osobowe wnioskodawcy/wnioskodawczyni": {
         "Imię/Imiona": formData["Imię/ Imiona"],
@@ -177,11 +179,7 @@ export class FormComponent implements OnInit {
       "Fotografia": formData["Fotografia"]
     };
 
-    console.log(json);
-
-    this.formService.getPDF(json).subscribe(
-      res => saveAs(res.body, "wniosek.pdf")
-    );
+    console.log(this.json);
 
   }
 
@@ -189,5 +187,8 @@ export class FormComponent implements OnInit {
     this.adjustFormData();
     console.log(this.formData);
     this.formDataToJSON(this.formData);
+    let dialogRef = this.dialog.open(SubmitPopUpComponent, {
+      data: { json: this.json },
+    });
   }
 }

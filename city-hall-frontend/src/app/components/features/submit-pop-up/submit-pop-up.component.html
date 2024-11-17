@@ -1,0 +1,10 @@
+<h2 mat-dialog-title>Zapis</h2>
+<mat-dialog-content>
+ Czy chcesz zapisać wniosek?
+</mat-dialog-content>
+<mat-dialog-actions>
+  <button mat-button (click)="downloadPdf()" mat-dialog-close>Pobierz</button>
+  <button mat-button (click)="savePdfToDrive()" mat-dialog-close>Zapisz na dysku google</button>
+  <button mat-button (click)="sendPdfMail()" mat-dialog-close>Wyślij na emial</button>
+  <button mat-button mat-dialog-close>Nie zapisuj</button>
+</mat-dialog-actions>
