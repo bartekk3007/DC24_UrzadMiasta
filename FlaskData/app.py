@@ -9,8 +9,35 @@ from flask_cors import CORS
 import os
 from utils.generate_schema.generate_schema import generate_schema
 
+import smtplib
+
+from email.message import EmailMessage
+from validate_email_address import validate_email
+
 app = Flask(__name__)
 CORS(app)
+
+SMTP_SERVER = 'smtp.gmail.com'
+SMTP_PORT = 587
+EMAIL_ADDRESS = '' #te pola nie wrzucam na githuba, uzupelnie przy pokazywaniu
+EMAIL_PASSWORD = ''
+
+def send_email_with_attachment(recipient_email, subject, body, pdf_file):
+    """Send an email with the given FileStorage object as an attachment."""
+    msg = EmailMessage()
+    msg['From'] = EMAIL_ADDRESS
+    msg['To'] = recipient_email
+    msg['Subject'] = subject
+    msg.set_content(body)
+
+    file_data = pdf_file.read()
+    file_name = pdf_file.filename
+    msg.add_attachment(file_data, maintype='application', subtype='pdf', filename=file_name)
+
+    with smtplib.SMTP(SMTP_SERVER, SMTP_PORT) as smtp:
+        smtp.starttls()
+        smtp.login(EMAIL_ADDRESS, EMAIL_PASSWORD)
+        smtp.send_message(msg)
 
 @app.route('/form', methods=['GET', 'POST'])
 def get_form_schema():
@@ -23,6 +50,30 @@ def get_form_schema():
             print(f"Error sending file: {e}")
             return jsonify({"error": f"Error sending the schema file: {e}"}), 500
 
+@app.route('/sendEmail', methods=['POST'])
+def send_email():
+    pdf_file = request.files.get('uploadFile')
+    recipient_email = request.args.get('email')
+
+    if not recipient_email:
+        return jsonify({"error": "Recipient email is required!"}), 400
+
+    if not validate_email(recipient_email):
+        return jsonify({"error": "Invalid email address!"}), 400
+
+    if not pdf_file or not pdf_file.filename:
+        return jsonify({"error": "No file uploaded!"}), 400
+
+    try:
+        send_email_with_attachment(
+            recipient_email=recipient_email,
+            subject="Your Requested PDF File",
+            body="Please find the requested PDF file attached.",
+            pdf_file=pdf_file
+        )
+        return jsonify({"message": "Email sent successfully!"})
+    except Exception as e:
+        return jsonify({"error": f"Failed to send email: {str(e)}"}), 500
 
 @app.route('/generatePdf', methods=['POST'])
 def generate_pdf():

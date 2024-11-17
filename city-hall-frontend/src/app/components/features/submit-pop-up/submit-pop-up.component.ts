@@ -47,6 +47,20 @@ export class SubmitPopUpComponent {
     );
   }
   sendPdfMail(){
+    let formData: FormData = new FormData()
+    this.formService.getPDF(this.data.json).subscribe(
+      res => {
+        //nice
+        let email = this.data.json['Dane kontaktowe wnioskodawcy/wnioskodawczyni']['Adres e-mail (opcjonalny)']
+        formData.append('uploadFile', res.body, "wniosek.pdf")
 
+        this.http.post('http://localhost:5000/sendEmail', formData, {params: {email: email}})
+            .subscribe(response => {
+                console.log("Plik wyslany ", response)
+            }, error => {
+                console.error("Blad przy wysylaniu pliku ", error)
+            })
+      }
+    );
   }
 }
