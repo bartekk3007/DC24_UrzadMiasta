@@ -21,6 +21,7 @@ export class FormComponent implements OnInit {
   private readonly ID_STOLEN_SECTION_TITLE = 'Dane dotyczące zgłoszenia kradzieży dowodu';
   private readonly SEX_MEN = 'mężczyzna';
   private readonly SEX_KEY = 'Płeć';
+  private readonly OPTIONAL_SECTIONS_COUNT = 2;
   private readonly PREV_ID_KEYS = [
     'Data wydania dowodu',
     'Numer  C A N',
@@ -37,7 +38,9 @@ export class FormComponent implements OnInit {
   formData: {
     [key: string]: string
   } = {};
-  json : {[key: string]: any};
+  json!: {[key: string]: any};
+  currentSection: number = 0;
+  isLastSection: boolean = false;
 
   constructor(private fb: FormBuilder, private formService: FormService, private dialog: MatDialog) {}
 
@@ -78,15 +81,16 @@ export class FormComponent implements OnInit {
     return field.label && field.label.includes('e-mail');
   }
 
-  displaySection(sectionTitle: string) {
-    if (!this.isPreviousIdSection(sectionTitle) && !this.isIdStolenSection(sectionTitle)) {
-      return true;
-    } else {
-      if (this.isPreviousIdSection(sectionTitle)) {
-        return this.displayPreviousDocumentSection();
-      }
-      return this.displayStolenDocumentSection();
+  setCurrentSection() {
+    if (this.currentSection < this.formConfig.sections.length - 1) {
+      this.currentSection++;
+      return;  
     }
+    this.isLastSection = true;
+  }
+
+  displaySection(sectionTitle: string) {
+    return sectionTitle === this.formConfig.sections[this.currentSection].title;
   }
 
   isMen() {
@@ -113,8 +117,19 @@ export class FormComponent implements OnInit {
     return sectionTitle.includes(this.REASON_KEY);
   }
 
+  private getSectionsLength() {
+    let length = this.formConfig.sections.length - 1 - this.OPTIONAL_SECTIONS_COUNT;
+    const displayPrevious = this.displayPreviousDocumentSection();
+    const displayStolen = this.displayStolenDocumentSection();
+
+  }
+
+  goToNextSection() {
+    this.setCurrentSection();
+  }
+
   allRequiredFilled() {
-    const fields = this.formConfig.sections.flatMap(section => section.fields);
+    const fields = this.formConfig.sections[this.currentSection].fields;
     for (let field of fields) {
       if (this.PREV_ID_KEYS.includes(field.key) && !this.displayPreviousDocumentSection()) {
         continue;

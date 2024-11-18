@@ -82,7 +82,7 @@ class PDFGenerator:
 
         body.set_font("Arial")
 
-        body.add_division().add_style("width: 80%; text-align: center; margin-left: 90%; margin-right: 0;").add_paragraph().add_text(f"{json["Miejscowość i data"]} (Miejscowość i data)")
+        body.add_division().add_style("width: 80%; text-align: center; margin-left: 90%; margin-right: 0;").add_paragraph().add_text(f"{json['Miejscowość i data']} (Miejscowość i data)")
         
         body.add_division().add_style("margin-bottom: 50px;").add_paragraph().add_text("Urząd miasta Gdańsk")
 
@@ -92,7 +92,7 @@ class PDFGenerator:
 
         for n, (k, v) in enumerate(json.items(), 1):
 
-            self.__addParagraph(body, f"{n}. {self.__genderParagraph(k, json["Dane osobowe wnioskodawcy/wnioskodawczyni"]["Płeć"] == "kobieta")}")
+            self.__addParagraph(body, f"{n}. {self.__genderParagraph(k, json['Dane osobowe wnioskodawcy/wnioskodawczyni']['Płeć'] == 'kobieta')}")
 
             self.__addContent(body, k, v)
 

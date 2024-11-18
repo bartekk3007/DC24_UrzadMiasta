@@ -1,7 +1,7 @@
 import time
 
 import requests
-from flask import Flask, request, render_template, jsonify, json, abort, make_response, send_from_directory
+from flask import Flask, request, jsonify, json, abort, make_response, send_from_directory
 from io import BytesIO
 from DocumentPDFGenerator.PDFGenerator import PDFGenerator
 import json as JSON
