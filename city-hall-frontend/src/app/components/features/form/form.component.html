@@ -15,7 +15,7 @@
                         <div>
                             <label>{{ getFormLabel(field) }} </label>
                             @if (field.options) {
-                                <select class="form-input" [name]="field.key" [(ngModel)]="formData[field.key]">
+                                <select class="form-input" [name]="field.key" (change)="setReasonIndex(field)" [(ngModel)]="formData[field.key]">
                                     @for (option of field.options; track $index) {
                                         <option [value]="option">{{ option }}</option>
                                     }
