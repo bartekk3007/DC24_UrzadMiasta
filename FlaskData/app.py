@@ -88,10 +88,29 @@ def generate_pdf():
         return response
     abort(404)
 
+
 @app.route('/Camunda', methods=['GET', 'POST'])
 def camunda_page():
+    """
+    :param optional JSON string boolean "plec": "false", gdy osoba wybrala we formularzu plec = kobieta. "true", gdy plec = mezczyzna
+    :param optional JSON string int "powod": 1 - pierwszy dowod, 2 - zmiana danych osobowych, 3 - uplyw terminu, 4 - zagubienie/utrata, 5 - kradziez dokumentu, 6 - uszkodzenie, 7 - kradziez tozsamosci, 8 - inny
+
+    Strona umozliwiajaca wykorzystanie modelu procesu biznesowego w Camundzie
+
+    Opis zwracanych zmiennych:\n
+    ▪ "czyMezczyzna" wskazuje koniecznosc zwracania sie do uzytkownika w adekwatny sposob wedlug wybranej plci\n
+    ▪ "czyKradziez" oraz "czyUzasadnienie" wskazuja odpowiednio koniecznosc wyswietlenia modulu dotyczacego szczegolow
+    zgloszenia na policji kradziezy dowodu oraz modulu, w ktorym nalezy uzasadnic swoj powod
+    wyslania zgloszenia.
+
+    :return: JSON string z booleanem "czyMezczyzna" lub z booleanami ("czyKradziez" oraz "czyUzasadnienie")
+    """
+    debug = True
+
     # Dzialanie dostepu do Camundy dopiero po kliknieciu przycisku
     if request.method == 'POST':
+
+        json_dict = request.json
 
         # Uzyskanie tokenu do Operate
 
@@ -125,19 +144,20 @@ def camunda_page():
         response = requests.post(url, headers=headers, data=data)
         tasklist_token = response.json()['access_token']
 
+        if "powod" not in json_dict:
 
-        # # Uruchomienie procesu
-        # webhook = 'UrzadWebhook'
-        # url = 'https://bru-2.connectors.camunda.io/eea87386-0393-4bbc-ad2e-a10a85bb2646/inbound/{0}'.format(webhook)
-        # headers = {
-        #     'Content-Type': 'text/plain'
-        # }
-        # data = {
-        #
-        # }
-        # data = json.dumps(data)
-        # response = requests.post(url, headers=headers, data=data)
-        # time.sleep(5)
+            # Uruchomienie procesu
+            webhook = 'UrzadWebhook'
+            url = 'https://bru-2.connectors.camunda.io/eea87386-0393-4bbc-ad2e-a10a85bb2646/inbound/{0}'.format(webhook)
+            headers = {
+                'Content-Type': 'text/plain'
+            }
+            data = {
+
+            }
+            data = json.dumps(data)
+            response = requests.post(url, headers=headers, data=data)
+            time.sleep(5)
 
         # Uzyskanie klucza umozliwiajacego znalezienie procesu
 
@@ -164,9 +184,11 @@ def camunda_page():
         response = requests.post(url, headers=headers, data=data)
         json_data = response.json()
         process_definition_key = json_data['items'][0]['key']
-        print("Process definition key is: {0}".format(process_definition_key))
+        if debug:
+            print("Process definition key is: {0}".format(process_definition_key))
+            print("189===============================1===================================")
 
-        #
+
         # # Uzyskanie formularza z danego procesu
         #
         # form="dane_osobowe"
@@ -180,7 +202,6 @@ def camunda_page():
         # }
         # # Wysylanie żadania POST z powyzszych zmiennych
         # response = requests.get(url, headers=headers, data=data)
-
 
         # Uzyskanie aktualnego zadania
         url = "https://bru-2.tasklist.camunda.io/eea87386-0393-4bbc-ad2e-a10a85bb2646/v1/tasks/search"
@@ -201,9 +222,11 @@ def camunda_page():
         }
         data = json.dumps(data)
         response = requests.post(url, headers=headers, data=data)
-        print(response.json())
         task_id = response.json()[0]['id']
         assignee = response.json()[0]['assignee']
+        if debug:
+            print(task_id)
+            print("229===============================2===================================")
 
         # Zadeklarowanie zadania do użytkownika
 
@@ -218,6 +241,8 @@ def camunda_page():
           'allowOverrideAssignment': 'true'
         }
         response = requests.patch(url, headers=headers, data=data)
+        if debug:
+            print("245===============================3===================================")
 
 
         # Uzyskanie zmiennych dostępnych w danym zadaniu
@@ -231,9 +256,153 @@ def camunda_page():
         data = {}
         response = requests.post(url, headers=headers, data=data)
         variables = response.json()
-        print(variables)
+        if debug:
+            print(variables)
+            print("261===============================4===================================")
+
+        # Wpisanie wartosci zmiennych w danym zadaniu
+        if "plec" in json_dict:
+            url = "https://bru-2.tasklist.camunda.io/eea87386-0393-4bbc-ad2e-a10a85bb2646/v1/tasks/{0}/complete".format(
+                task_id)
+            headers = {
+                'Content-Type': 'application/json',
+                'Authorization': 'Bearer {0}'.format(tasklist_token),
+                'Accept': 'application/json'
+            }
+            data = {
+                "variables": [
+                    {
+                        "name": "plec",
+                        "value": json_dict["plec"]
+                    }
+                ]
+            }
+            data = json.dumps(data)
+            #print(data)
+            response = requests.patch(url, headers=headers, data=data)
+            if debug:
+                print("284===============================5===================================")
+
+        elif "powod" in json_dict:
+
+            # Wpisanie wartosci zmiennych w danym zadaniu
+
+            url = "https://bru-2.tasklist.camunda.io/eea87386-0393-4bbc-ad2e-a10a85bb2646/v1/tasks/{0}/complete".format(
+                task_id)
+            headers = {
+                'Content-Type': 'application/json',
+                'Authorization': 'Bearer {0}'.format(tasklist_token),
+                'Accept': 'application/json'
+            }
+            data = {
+                "variables": [
+                    {
+                        "name": "powod",
+                        "value": json_dict["powod"]
+                    }
+                ]
+            }
+            data = json.dumps(data)
+            response = requests.patch(url, headers=headers, data=data)
+        if debug:
+            print("308===============================5===================================")
+
+        time.sleep(5)
+
+        url = "https://bru-2.tasklist.camunda.io/eea87386-0393-4bbc-ad2e-a10a85bb2646/v1/tasks/search"
+        headers = {
+            'Content-Type': 'application/json',
+            'Authorization': 'Bearer {0}'.format(tasklist_token),
+            'Accept': 'application/json'
+        }
+        data = {
+            'processDefinitionKey': process_definition_key,
+            'pageSize': 1,
+            'sort': [
+                {
+                    'field': 'creationTime',
+                    'order': 'DESC'
+                }
+            ]
+        }
+        data = json.dumps(data)
+        response = requests.post(url, headers=headers, data=data)
+        task_id = response.json()[0]['id']
+        assignee = response.json()[0]['assignee']
+
+        # Uzyskanie zmiennych dostępnych w danym zadaniu
+
+        url = "https://bru-2.tasklist.camunda.io/eea87386-0393-4bbc-ad2e-a10a85bb2646/v1/tasks/{0}/variables/search".format(
+            task_id)
+        headers = {
+            'Content-Type': 'application/json',
+            'Authorization': 'Bearer {0}'.format(tasklist_token),
+            'Accept': 'application/json'
+        }
+        data = {}
+        response = requests.post(url, headers=headers, data=data)
+        variables = response.json()
+        if debug:
+            print(variables)
+            print("347===============================6===================================")
+
+        if "plec" in json_dict:
+            for variable in variables:
+                print(variable)
+                if "czyMezczyzna" in variable['name']:
+                    print("wchodze tutaj jak ta lala")
+                    return jsonify({'czyMezczyzna': variable['value']}), 200
+
+        elif "powod" in json_dict:
+            czyKradziez = False
+            czyUzasadnienie = False
+            for variable in variables:
+                print(variable['name'])
+                if "czyKradziez" in variable['name']:
+                    print("wszedlem tutaj i pobieram wartosc kradziez")
+                    czyKradziez = variable['value']
+                elif "czyUzasadnienie" in variable['name']:
+                    print("wartosc uzasadnienia")
+                    czyUzasadnienie = variable['value']
+
+            # Po uzyskaniu z ostatniego zadania w procesie zmiennych do wyswietlenia modulow nalezy zamknac caly proces poprzez zakonczenie tegoz zadania
+            # Zadeklarowanie zadania do użytkownika
+
+            url = "https://bru-2.tasklist.camunda.io/eea87386-0393-4bbc-ad2e-a10a85bb2646/v1/tasks/{0}/assign".format(
+                task_id)
+            headers = {
+                'Content-Type': 'application/json',
+                'Authorization': 'Bearer {0}'.format(tasklist_token),
+                'Accept': 'application/json'
+            }
+            data = {
+                'assignee': '{0}'.format(assignee),
+                'allowOverrideAssignment': 'true'
+            }
+            response = requests.patch(url, headers=headers, data=data)
+            if debug:
+                print("384===============================7===================================")
+
+            # Zakonczenie procesu
+            url = "https://bru-2.tasklist.camunda.io/eea87386-0393-4bbc-ad2e-a10a85bb2646/v1/tasks/{0}/complete".format(
+                task_id)
+            headers = {
+                'Content-Type': 'application/json',
+                'Authorization': 'Bearer {0}'.format(tasklist_token),
+                'Accept': 'application/json'
+            }
+            data = {
+            }
+            data = json.dumps(data)
+            # print(data)
+            response = requests.patch(url, headers=headers, data=data)
+            if debug:
+                print("400===============================8===================================")
+
+            return jsonify({"czyKradziez": czyKradziez, "czyUzasadnienie": czyUzasadnienie}), 200
 
         return jsonify(response.json()), response.status_code
+    return jsonify({"status": "Ok"}),200
 
 if __name__ == '__main__':
     app.run(host='0.0.0.0', port=5000, debug=True)
