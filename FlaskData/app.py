@@ -89,7 +89,7 @@ def generate_pdf():
     abort(404)
 
 
-@app.route('/Camunda', methods=['GET', 'POST'])
+@app.route('/camunda', methods=['GET', 'POST'])
 def camunda_page():
     """
     :param optional JSON string boolean "plec": "false", gdy osoba wybrala we formularzu plec = kobieta. "true", gdy plec = mezczyzna
