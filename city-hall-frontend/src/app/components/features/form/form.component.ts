@@ -1,10 +1,11 @@
 import { Component, OnInit } from '@angular/core';
 import { FormBuilder, FormGroup, ReactiveFormsModule, FormsModule } from '@angular/forms';
 import { CommonModule } from '@angular/common';
-import { FormConfig, FormDataSchema, FormFieldConfig } from './form.types';
+import { CamundaReasonResponse, CamundaSexResponse, FormConfig, FormDataSchema, FormDataType, FormFieldConfig, FormSectionConfig, StringBoolean } from './form.types';
 import { FormService } from '../../../services/form/form.service';
 import {SubmitPopUpComponent} from '../submit-pop-up/submit-pop-up.component';
 import {MatDialog, MatDialogModule} from '@angular/material/dialog';
+import { LoadingService } from '../../../services/loader/loading.service';
 
 @Component({
   selector: 'app-form',
@@ -21,6 +22,7 @@ export class FormComponent implements OnInit {
   private readonly ID_STOLEN_SECTION_TITLE = 'Dane dotyczące zgłoszenia kradzieży dowodu';
   private readonly SEX_MEN = 'mężczyzna';
   private readonly SEX_KEY = 'Płeć';
+  private readonly OPTIONAL_SECTIONS_COUNT = 2;
   private readonly PREV_ID_KEYS = [
     'Data wydania dowodu',
     'Numer  C A N',
@@ -31,15 +33,30 @@ export class FormComponent implements OnInit {
     'Data zgłoszenia',
     'Nazwa i adres jednostki policji'
   ];
+  private readonly OTHER_REASON_SECTION: FormSectionConfig = {
+    fields: [
+      {
+        key: this.REASON_KEY,
+        required: true
+      }
+    ],
+    title: 'Podaj inny powód złożenia wniosku'
+  };
   identityForm!: FormGroup;
   schema!: FormDataSchema;
   formConfig!: FormConfig;
-  formData: {
-    [key: string]: string
-  } = {};
-  json : {[key: string]: any};
+  formData: FormDataType = {};
+  json!: {[key: string]: any};
+  currentSection: number = 0;
+  isLastSection: boolean = false;
+  isMen: boolean = false;
+  reasonIndex: number = 0;
+  sectionDisplayFlags = {
+    stolen: false,
+    other: false
+  };
 
-  constructor(private fb: FormBuilder, private formService: FormService, private dialog: MatDialog) {}
+  constructor(private fb: FormBuilder, private formService: FormService, private dialog: MatDialog, private loadingService: LoadingService) {}
 
   ngOnInit(): void {
     this.formService.getFormSchema().subscribe({
@@ -78,27 +95,30 @@ export class FormComponent implements OnInit {
     return field.label && field.label.includes('e-mail');
   }
 
-  displaySection(sectionTitle: string) {
-    if (!this.isPreviousIdSection(sectionTitle) && !this.isIdStolenSection(sectionTitle)) {
-      return true;
-    } else {
-      if (this.isPreviousIdSection(sectionTitle)) {
-        return this.displayPreviousDocumentSection();
-      }
-      return this.displayStolenDocumentSection();
+  private setSectionTitleBasedOnSex(sectionConfig: FormSectionConfig) {
+    const text = this.isMen ? 'wnioskodawcy' : 'wnioskodawczyni';
+    sectionConfig.title = `Dane kontaktowe ${text}`;
+  }
+
+  setCurrentSection() {
+    const maxLength = this.getSectionsLength();
+    this.isLastSection = this.currentSection === maxLength - 1;
+    if (this.currentSection < maxLength) {
+      this.currentSection++;
+      return;
     }
   }
 
-  isMen() {
-    return this.formData[this.SEX_KEY] && this.formData[this.SEX_KEY].includes(this.SEX_MEN);
+  displaySection(sectionTitle: string) {
+    return sectionTitle === this.formConfig.sections[this.currentSection].title;
   }
 
-  private isPreviousIdSection(sectionTitle: string): boolean {
-    return sectionTitle.includes(this.PREV_ID_SECTION_TITLE);
+  menSelected() {
+    return (this.formData[this.SEX_KEY] && this.formData[this.SEX_KEY].includes(this.SEX_MEN)) as boolean;
   }
 
-  private isIdStolenSection(sectionTitle: string): boolean {
-    return sectionTitle.includes(this.ID_STOLEN_SECTION_TITLE);
+  setIsMen(camundaInfo: CamundaSexResponse) {
+    this.isMen = this.getStringBooleanValue(camundaInfo.czyMezczyzna);
   }
 
   private displayPreviousDocumentSection() {
@@ -109,12 +129,111 @@ export class FormComponent implements OnInit {
     return this.formData[this.REASON_KEY] && this.formData[this.REASON_KEY].includes(this.IS_STOLEN_REASON);
   }
 
-  isReasonField(sectionTitle: string) {
-    return sectionTitle.includes(this.REASON_KEY);
+  private getSectionsLength() {
+    const length = this.formConfig.sections.length;
+    return length - 1;
+  }
+
+  private currentSectionHasSexProperty(): boolean {
+    const formSectionFields = this.formConfig.sections[this.currentSection].fields.flatMap(field => field.label ? field.label : '');
+    return formSectionFields.includes(this.SEX_KEY);
+  }
+
+  private currentSectionHasReasonProperty(): boolean {
+    const currentSection =  this.formConfig.sections[this.currentSection];
+    return currentSection.title.includes(this.REASON_KEY);
+  }
+
+  private setStolenAndOtherReasonFields(camundaInfo: CamundaReasonResponse) {
+    this.sectionDisplayFlags = {
+      other: this.getStringBooleanValue(camundaInfo.czyUzasadnienie),
+      stolen: this.getStringBooleanValue(camundaInfo.czyKradziez)
+    }
+
+    if (this.sectionDisplayFlags.other) {
+      this.formConfig.sections.splice(4, 0, this.OTHER_REASON_SECTION);
+    }
+  }
+
+  private getStringBooleanValue = (flag: StringBoolean): boolean => flag === 'true'; 
+
+  goToNextSection() {
+    if (this.currentSectionHasSexProperty()) {
+      this.sendSexInfoToCamunda();
+    } else if(this.currentSectionHasReasonProperty()) {
+      this.sendReasonInfoToCamunda();
+    } else {
+      this.setCurrentSection();
+    }
+  }
+
+  setReasonIndex(field: FormFieldConfig) {
+    const reason = this.formData[this.REASON_KEY];
+    if (reason && field.options) {
+      this.reasonIndex = field.options.indexOf(reason) + 1;
+    }
+  }
+
+  private removeUselessSections() {
+    if (!this.displayPreviousDocumentSection()) {
+      this.formConfig.sections = this.formConfig.sections.filter(seciton => !seciton.title.includes('Dane poprzedniego') && !seciton.title.includes('kradzieży'));
+      return;
+    }
+    if (!this.sectionDisplayFlags.stolen) {
+      this.formConfig.sections = this.formConfig.sections.filter(seciton => !seciton.title.includes('kradzieży'));
+    }
+  }
+  
+  private sendReasonInfoToCamunda() {
+    const data = {
+      powod: this.reasonIndex
+    }
+
+    this.loadingService.setIsLoading(true);
+
+    this.formService.sendDataToCamunda(data).subscribe(
+      {
+        next: response => {
+          console.log(response);
+          this.setStolenAndOtherReasonFields(response as CamundaReasonResponse);
+          this.removeUselessSections();
+          this.setCurrentSection();
+          this.loadingService.setIsLoading(false);
+        },
+        error: error => {
+          this.loadingService.setIsLoading(false);
+          console.error(error);
+        }
+      }
+    );
+  }
+
+  private sendSexInfoToCamunda() {
+    const data = {
+      plec: this.menSelected()
+    }
+
+    this.loadingService.setIsLoading(true);
+
+    this.formService.sendDataToCamunda(data).subscribe(
+      {
+        next: response => {
+          console.log(response);
+          this.setIsMen(response as CamundaSexResponse);
+          this.setSectionTitleBasedOnSex(this.formConfig.sections[this.currentSection + 1]);
+          this.setCurrentSection();
+          this.loadingService.setIsLoading(false);
+        },
+        error: error => {
+          this.loadingService.setIsLoading(false);
+          console.error(error);
+        }
+      }
+    );
   }
 
   allRequiredFilled() {
-    const fields = this.formConfig.sections.flatMap(section => section.fields);
+    const fields = this.formConfig.sections[this.currentSection].fields;
     for (let field of fields) {
       if (this.PREV_ID_KEYS.includes(field.key) && !this.displayPreviousDocumentSection()) {
         continue;
@@ -145,7 +264,7 @@ export class FormComponent implements OnInit {
     }
   }
 
-  formDataToJSON(formData: {[key: string]: string}){
+  formDataToJSON(formData: FormDataType){
     this.json = {
       "Miejscowość i data": formData["Miejscowość i data"],
       "Dane osobowe wnioskodawcy/wnioskodawczyni": {
@@ -179,15 +298,13 @@ export class FormComponent implements OnInit {
       "Fotografia": formData["Fotografia"]
     };
 
-    console.log(this.json);
 
   }
 
   onSubmit() {
     this.adjustFormData();
-    console.log(this.formData);
     this.formDataToJSON(this.formData);
-    let dialogRef = this.dialog.open(SubmitPopUpComponent, {
+    this.dialog.open(SubmitPopUpComponent, {
       data: { json: this.json },
     });
   }

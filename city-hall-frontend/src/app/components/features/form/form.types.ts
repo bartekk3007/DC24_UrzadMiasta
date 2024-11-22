@@ -47,3 +47,27 @@ export type FormSectionConfig = {
 export type FormConfig = {
     sections: FormSectionConfig[];
 };
+
+export type StringBoolean = 'true' | 'false';
+
+export type CamundaSexPayload = {
+    plec: boolean; 
+}
+
+export type CamundaReasonPayload = {
+    powod: number;
+}
+
+export type CamundaPayload = CamundaSexPayload | CamundaReasonPayload;
+
+export type CamundaReasonResponse = {
+    czyKradziez: StringBoolean;
+    czyUzasadnienie: StringBoolean;
+}
+export type CamundaSexResponse = {
+    czyMezczyzna: StringBoolean;
+};
+
+export type CamundaResponse = CamundaReasonResponse | CamundaSexResponse;
+
+export type FormDataType = {[key: string]: string}

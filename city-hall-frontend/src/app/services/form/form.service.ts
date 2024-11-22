@@ -1,6 +1,6 @@
 import { HttpClient } from '@angular/common/http';
 import { Injectable } from '@angular/core';
-import { FormConfig, FormDataSchema, FormFieldConfig, FormSectionConfig, SCHEMA_PROPERTIES_TYPES, SchemaObjectProperties, SchemaProperties, SchemaStringProperties } from '../../components/features/form/form.types';
+import { CamundaPayload, CamundaResponse, CamundaSexResponse, FormConfig, FormDataSchema, FormFieldConfig, FormSectionConfig, SCHEMA_PROPERTIES_TYPES, SchemaObjectProperties, SchemaProperties, SchemaStringProperties } from '../../components/features/form/form.types';
 import { map, Observable } from 'rxjs';
 import { Validators, ValidatorFn, AbstractControl, ValidationErrors } from '@angular/forms';
 import { environment } from '../../../../environments/environment'; 
@@ -9,17 +9,23 @@ import { environment } from '../../../../environments/environment';
   providedIn: 'root'
 })
 export class FormService {
-  private apiUrl = `${environment.apiUrl}/form`;
-  private pdfUrl = `${environment.apiUrl}/generatePdf`;
+  private readonly FORM_ENDPOINT = 'form';
+  private readonly PDF_ENDPOINT = 'generatePdf';
+  private readonly CAMUNDA_ENDPOINT = 'camunda';
+  private apiUrl = `${environment.apiUrl}`;
 
   constructor(private http: HttpClient) { }
 
   getFormSchema(): Observable<FormDataSchema> {
-    return this.http.get<FormDataSchema>(this.apiUrl);
+    return this.http.get<FormDataSchema>(`${this.apiUrl}/${this.FORM_ENDPOINT}`);
   }
 
   getPDF(json: {[key: string]: any}): Observable<any> {
-    return this.http.post<any>(this.pdfUrl, json, { observe: 'response', responseType: "blob" as "json"});
+    return this.http.post<any>(`${this.apiUrl}/${this.PDF_ENDPOINT}`, json, { observe: 'response', responseType: "blob" as "json"});
+  }
+
+  sendDataToCamunda(data: CamundaPayload): Observable<CamundaResponse> {
+    return this.http.post<CamundaResponse>(`${this.apiUrl}/${this.CAMUNDA_ENDPOINT}`, data);
   }
 
   getFormConfig(schema: FormDataSchema): FormConfig {
