@@ -157,7 +157,7 @@ def camunda_page():
             }
             data = json.dumps(data)
             response = requests.post(url, headers=headers, data=data)
-            time.sleep(5)
+            time.sleep(6)
 
         # Uzyskanie klucza umozliwiajacego znalezienie procesu
 
@@ -184,6 +184,7 @@ def camunda_page():
         response = requests.post(url, headers=headers, data=data)
         json_data = response.json()
         process_definition_key = json_data['items'][0]['key']
+        time.sleep(2)
         if debug:
             print("Process definition key is: {0}".format(process_definition_key))
             print("189===============================1===================================")
@@ -224,6 +225,7 @@ def camunda_page():
         response = requests.post(url, headers=headers, data=data)
         task_id = response.json()[0]['id']
         assignee = response.json()[0]['assignee']
+        time.sleep(2)
         if debug:
             print(task_id)
             print("229===============================2===================================")
@@ -241,6 +243,7 @@ def camunda_page():
           'allowOverrideAssignment': 'true'
         }
         response = requests.patch(url, headers=headers, data=data)
+        time.sleep(2)
         if debug:
             print("245===============================3===================================")
 
@@ -329,6 +332,7 @@ def camunda_page():
         response = requests.post(url, headers=headers, data=data)
         task_id = response.json()[0]['id']
         assignee = response.json()[0]['assignee']
+        time.sleep(2)
 
         # Uzyskanie zmiennych dostępnych w danym zadaniu
 
@@ -342,6 +346,7 @@ def camunda_page():
         data = {}
         response = requests.post(url, headers=headers, data=data)
         variables = response.json()
+        time.sleep(2)
         if debug:
             print(variables)
             print("347===============================6===================================")
